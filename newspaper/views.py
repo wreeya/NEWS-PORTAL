@@ -3,13 +3,14 @@ from django.urls import reverse_lazy
 from django.views.generic import TemplateView, ListView, DetailView, CreateView
 
 from newspaper.forms import ContactForm
-from newspaper.models import Advertisement, Post, Contact, OurTeam
+from newspaper.models import Advertisement, Post, Contact, OurTeam, Category
 
 from django.utils import timezone
 from datetime import timedelta
 from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib import messages
 
+from newspaper.models import Category
 # Create your views here.
 
 class SidebarMixin:
@@ -127,3 +128,9 @@ class PostByCategoryView(SidebarMixin, ListView):
             category__id=self.kwargs["category_id"],
         ).order_by("-published_at")
         return query
+
+
+class CategoryListView(ListView):
+    model = Category
+    template_name = 'newsportal/categories.html'
+    context_object_name = 'categories'

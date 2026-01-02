@@ -12,5 +12,6 @@ urlpatterns = [
         views.PostByCategoryView.as_view(),
         name='post-by-category',
     ),
+    path("category-list/",views.CategoryListView.as_view(), name='category-list'),
 
 ]
