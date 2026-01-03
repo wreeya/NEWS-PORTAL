@@ -10,7 +10,7 @@ from datetime import timedelta
 from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib import messages
 
-from newspaper.models import Category
+from newspaper.models import Category, Tag
 # Create your views here.
 
 class SidebarMixin:
@@ -133,4 +133,9 @@ class PostByCategoryView(SidebarMixin, ListView):
 class CategoryListView(ListView):
     model = Category
     template_name = 'newsportal/categories.html'
-    context_object_name = 'categories'
+    context_object_name = 'categories' #categories.object.all()
+
+class TagListView(ListView):
+    model = Tag
+    template_name = 'newsportal/tags.html'
+    context_object_name = 'tags'
