@@ -1,6 +1,7 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
 from accounts.forms import LoginForm
+from accounts.views import RegisterView
 app_name = 'accounts'
 
 urlpatterns = [
@@ -11,4 +12,9 @@ urlpatterns = [
          name='login',
          ),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+    path('register/', RegisterView.as_view(), name='register'),
 ]
+
+#post list
+#Admin=>admin:post-list
+#Client => post-list
