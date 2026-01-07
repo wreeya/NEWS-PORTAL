@@ -1,16 +1,20 @@
 from django.shortcuts import render
-from django.urls import reverse_lazy
-from django.views.generic import TemplateView, ListView, DetailView, CreateView
+from django.urls import reverse_lazy, reverse
+from django.views.generic import TemplateView, ListView, DetailView, CreateView , View
+from django.views.generic.edit import FormMixin
 
-from newspaper.forms import ContactForm
-from newspaper.models import Advertisement, Post, Contact, OurTeam, Category
+from newspaper.forms import ContactForm, CommentForm, NewsletterForm
+from newspaper.models import Advertisement, Post, Contact, OurTeam, Category, Tag
 
 from django.utils import timezone
 from datetime import timedelta
 from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib import messages
 
-from newspaper.models import Category, Tag
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
+from django.http import JsonResponse
+
 # Create your views here.
 
 class SidebarMixin:
@@ -155,16 +159,6 @@ class PostByTagView(SidebarMixin, ListView):
         ).order_by("-published_at")
         return query
 
-
-from django.views.generic import ListView, DetailView
-from django.views.generic.edit import FormMixin
-
-from .models import Post
-from .forms import CommentForm
-# from .mixins import SidebarMixin
-from django.urls import reverse
-
-
 class PostListView(SidebarMixin, ListView):
     model = Post
     template_name = "newsportal/list/list.html"
@@ -211,9 +205,6 @@ class PostDetailView(SidebarMixin, FormMixin, DetailView):
     def get_success_url(self):
         return reverse("post-detail", kwargs={"pk": self.object.pk})
 
-    from django.contrib import messages
-    from django.contrib.auth.decorators import login_required
-    from django.utils.decorators import method_decorator
 
     @method_decorator(login_required, name="post")
     def post(self, request, *args, **kwargs):
@@ -237,3 +228,38 @@ class PostDetailView(SidebarMixin, FormMixin, DetailView):
         )
 
         return super().form_valid(form)
+
+class NewsletterView(View):
+
+    def post(self, request):
+        is_ajax = request.headers.get("x-requested-with")
+
+        if is_ajax == "XMLHttpRequest":
+            form = NewsletterForm(request.POST)
+
+            if form.is_valid():
+                form.save()
+                return JsonResponse(
+                    {
+                        "success": True,
+                        "message": "Successfully subscribed to the newsletter.",
+                    },
+                    status=201,
+                )
+            else:
+                return JsonResponse(
+                    {
+                        "success": False,
+                        "message": "Cannot subscribe to the newsletter.",
+                    },
+                    status=400,
+                )
+
+        else:
+            return JsonResponse(
+                {
+                    "success": False,
+                    "message": "Cannot process. Must be an AJAX XMLHttpRequest",
+                },
+                status=400,
+            )
