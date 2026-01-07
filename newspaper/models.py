@@ -98,3 +98,24 @@ class Contact(TimeStampModel):
 # 1 tag can have M posts => M
 # 1 post can have M tags => M
 # ManyToManyField => M => Any => Post
+
+from django.db import models
+from django.contrib.auth.models import User
+
+from .models import Post
+
+
+#post.comment_set.all
+class Comment(TimeStampModel):
+    post = models.ForeignKey(
+        Post,
+        on_delete=models.CASCADE
+    )
+    user = models.ForeignKey(
+        "auth.User",
+        on_delete=models.CASCADE
+    )
+    content = models.TextField()
+
+    def __str__(self):
+        return f"{self.content[:50]} | {self.user.username}"

@@ -154,3 +154,86 @@ class PostByTagView(SidebarMixin, ListView):
             tag__id=self.kwargs["tag_id"],
         ).order_by("-published_at")
         return query
+
+
+from django.views.generic import ListView, DetailView
+from django.views.generic.edit import FormMixin
+
+from .models import Post
+from .forms import CommentForm
+# from .mixins import SidebarMixin
+from django.urls import reverse
+
+
+class PostListView(SidebarMixin, ListView):
+    model = Post
+    template_name = "newsportal/list/list.html"
+    context_object_name = "posts"
+
+
+    def get_queryset(self):
+        query = super().get_queryset() #Post.objects.all()
+        query = query.filter(published_at__isnull=False, status="active")
+        return query
+
+
+class PostDetailView(SidebarMixin, FormMixin, DetailView):
+    model = Post
+    template_name = "newsportal/detail/detail.html"
+    context_object_name = "post"
+    form_class = CommentForm
+
+    def get_queryset(self):
+        query = super().get_queryset()  # Post.objects.all()
+        query = query.filter(published_at__isnull=False, status="active")
+        return query
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # increasing the views count of currently viewed post
+        current_post = self.object
+        current_post.views_count += 1
+        current_post.save()
+
+        context["related_posts"] = (
+            Post.objects.filter(
+                published_at__isnull=False,
+                status="active",
+                category=self.object.category,
+            )
+            .exclude(id=self.object.id)
+            .order_by("-published_at", "-views_count")[:2]
+        )
+
+        return context
+
+    def get_success_url(self):
+        return reverse("post-detail", kwargs={"pk": self.object.pk})
+
+    from django.contrib import messages
+    from django.contrib.auth.decorators import login_required
+    from django.utils.decorators import method_decorator
+
+    @method_decorator(login_required, name="post")
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        form = self.get_form()
+
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
+
+    def form_valid(self, form):
+        comment = form.save(commit=False)
+        comment.post = self.object
+        comment.user = self.request.user
+        comment.save()
+
+        messages.success(
+            self.request,
+            "Your comment has been added successfully."
+        )
+
+        return super().form_valid(form)
