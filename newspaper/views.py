@@ -267,3 +267,20 @@ class PostSearchView(View):
         except PageNotAnInteger:
             posts = paginator.page(1)
         # pagination end
+        popular_posts = Post.objects.filter(
+            published_at__isnull=False, status="active"
+        ).order_by("-published_at")[:5]
+
+        advertisement = Advertisement.objects.all().order_by("-created_at").first()
+
+        return render(
+            request,
+            self.template_name,
+            {
+                "page_obj": posts,
+                "query": query,
+                "popular_posts": popular_posts,
+                "advertisement": advertisement,
+            },
+        )
+
