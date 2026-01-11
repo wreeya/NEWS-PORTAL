@@ -125,3 +125,20 @@ class Newsletter(TimeStampModel):
 
     def __str__(self):
         return self.email
+
+# Post - Image
+# 1 post can have M images => M
+# 1 image is associated to only 1 post => 1
+# ForeignKey => M => Image
+
+#PostImage(image)
+# class PostImage(models.Model):
+#     image = models.ImageField(
+#         upload_to="post_images/%Y/%m/%d",
+#         blank=False
+#     )
+#     post = models.ForeignKey(  kun post ma chai halne
+#         Post,
+#         on_delete=models.CASCADE
+#     )
+#     is_active = models.BooleanField(default=True)

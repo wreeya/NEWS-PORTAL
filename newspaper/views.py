@@ -258,12 +258,12 @@ class PostSearchView(View):
         )  # QuerySet => ORM
 
         # pagination start
-        page = request.GET.get("page", 1)  # x
+        page = request.GET.get("page", 1)  # 1
         paginate_by = 1
         paginator = Paginator(post_list, paginate_by)
 
         try:
-            posts = paginator.page(page)
+            posts = paginator.page(page) #1
         except PageNotAnInteger:
             posts = paginator.page(1)
         # pagination end
