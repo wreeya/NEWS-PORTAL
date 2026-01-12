@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'newspaper',
     'accounts',
     'report',
+    'django_summernote',
 ]
 
 MIDDLEWARE = [
