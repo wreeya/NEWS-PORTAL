@@ -14,7 +14,7 @@
                        height="70" />
                   <div>
                       <a href="article.html" class="popular-title-link">{{ post.title }}</a>
-                      <p class="popular-description">{{ post.content|truncatechars:100 }}</p>
+                      <p class="popular-description">{{ post.content|striptags|truncatechars:100 }}</p>
                   </div>
                 </li>
                   {% endfor %}
