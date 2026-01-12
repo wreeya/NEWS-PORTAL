@@ -18,27 +18,15 @@ COLUMNS = [
     "date_joined",
 ]
 
-
 class UserReportView(View):
     def get(self, request):
         response = HttpResponse(content_type="text/csv")
-        response["Content-Disposition"] = 'attachment; filename="users.csv"'
+        response["Content-Disposition"] = "attachment; filename=users.csv"
 
-        writer = csv.writer(response)
-        writer.writerow(COLUMNS)
+        users = User.objects.all().only(*COLUMNS).values(*COLUMNS)
 
-        for user in User.objects.all():
-            writer.writerow([
-                user.first_name,
-                user.last_name,
-                user.username,
-                user.email,
-                user.is_staff,
-                user.is_active,
-                user.is_superuser,
-                user.last_login,
-                user.date_joined,
-            ])
+        writer = csv.DictWriter(response, fieldnames=COLUMNS)
+        writer.writeheader()
+        writer.writerows(users)
 
         return response
-
