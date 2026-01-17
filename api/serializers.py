@@ -1,6 +1,6 @@
 from django.contrib.auth.models import Group, User
 from rest_framework import serializers
-from newspaper.models import Tag
+from newspaper.models import Tag, Category
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -18,3 +18,7 @@ class TagSerializer(serializers.ModelSerializer):
          model = Tag
          fields = ["id", "name"]
 
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ["id", "name", "icon", "description"]
