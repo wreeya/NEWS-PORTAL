@@ -9,7 +9,7 @@ router.register(r"groups", views.GroupViewSet)
 router.register(r'tags', views.TagViewSet)
 router.register(r'categories', views.CategoryViewSet)
 router.register(r'posts', views.PostViewSet)
-
+router.register(r'newsletters', views.NewsletterViewSet)
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.
 urlpatterns = [
@@ -19,6 +19,28 @@ urlpatterns = [
          views.PostListByCategoryView.as_view(),
          name="post-list-by-category-api",
     ),
+    path(
+        "post-by-tag/<int:tag_id>/",
+        views.PostListByTagView.as_view(),
+        name="post-list-by-tag-api",
+    ),
+    path(
+        "draft-list/",
+        views.DraftListView.as_view(),
+        name="draft-list-api",
+    ),
+    path(
+        "draft-detail/<int:pk>/",
+        views.DraftDetailView.as_view(),
+        name="draft-detail-api",
+    ),
+
+    path(
+        "post-publish/",
+        views.PostPublishViewSet.as_view(),
+        name="post-publish-api",
+    ),
+
 
     path("api-auth/", include("rest_framework.urls", namespace="rest_framework")),
 ]

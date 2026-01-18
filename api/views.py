@@ -3,11 +3,14 @@ from django.shortcuts import render
 # Create your views here.
 from django.contrib.auth.models import Group, User
 from rest_framework import permissions, viewsets
-from newspaper.models import Tag, Category
+from newspaper.models import Tag, Category, Newsletter
 from rest_framework.response import Response
-from rest_framework.generics import ListAPIView
-from api.serializers import GroupSerializer, UserSerializer, TagSerializer, CategorySerializer
+from rest_framework.generics import ListAPIView, RetrieveAPIView
+from api.serializers import GroupSerializer, UserSerializer, TagSerializer, CategorySerializer, PostPublishSerializer, NewsletterSerializer
+from rest_framework.views import APIView
+from rest_framework import status, exceptions
 
+from django.utils import timezone
 
 class UserViewSet(viewsets.ModelViewSet):
     """
@@ -110,3 +113,56 @@ class PostListByCategoryView(ListAPIView):
             category=self.kwargs["category_id"],
         )
         return queryset
+
+class PostListByTagView(ListAPIView):
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer
+    permission_classes = [permissions.AllowAny]
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        queryset = queryset.filter(
+            status="active",
+            published_at__isnull=False,
+            tag=self.kwargs["tag_id"],
+        )
+        return queryset
+
+class DraftListView(ListAPIView):
+    queryset = Post.objects.filter(published_at__isnull=True)
+    serializer_class = PostSerializer
+    permission_classes = [permissions.IsAdminUser]
+
+class DraftDetailView(RetrieveAPIView):
+    queryset = Post.objects.filter(published_at__isnull=True)
+    serializer_class = PostSerializer
+    permission_classes = [permissions.IsAdminUser]
+
+class PostPublishViewSet(APIView):
+    permission_classes = [permissions.IsAdminUser]
+
+    def post(self, request, *args, **kwargs):
+        serializer = PostPublishSerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            data = serializer.data
+
+            # publish the post
+            post = Post.objects.get(pk=data["id"])
+            post.published_at = timezone.now()
+            post.save()
+
+            serialized_data = PostSerializer(post).data
+            return Response(serialized_data, status=status.HTTP_200_OK)
+
+class NewsletterViewSet(viewsets.ModelViewSet):
+    queryset = Newsletter.objects.all()
+    serializer_class = NewsletterSerializer
+    permission_classes = [permissions.AllowAny]
+
+    def get_permissions(self):
+        if self.action in ["list", "retrieve", "destroy"]:
+            return [permissions.IsAdminUser()]
+        return super().get_permissions()
+
+    def update(self, request, *args, **kwargs):
+        raise exceptions.MethodNotAllowed(request.method)
