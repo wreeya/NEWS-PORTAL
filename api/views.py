@@ -52,3 +52,27 @@ class CategoryViewSet(viewsets.ModelViewSet):
         if self.action in ["list", "retrieve"]:
             return [permissions.AllowAny()]
         return super().get_permissions()
+
+from rest_framework import viewsets, permissions
+from newspaper.models import Post
+from api.serializers import PostSerializer
+
+
+class PostViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows Posts to be viewed or edited.
+    """
+    queryset = Post.objects.all().order_by("-published_at")
+    serializer_class = PostSerializer
+    permission_classes = [permissions.IsAdminUser]
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        if self.action in ["list", "retrieve"]:
+            queryset = queryset.filter(status="active", published_at__isnull=False)
+        return queryset
+
+    def get_permissions(self):
+        if self.action in ["list", "retrieve"]:
+            return [permissions.AllowAny()]
+        return super().get_permissions()
