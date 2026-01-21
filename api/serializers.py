@@ -1,7 +1,7 @@
 from django.contrib.auth.models import Group, User
 from rest_framework import serializers
-from newspaper.models import Tag, Category, Post, Newsletter
-
+from newspaper.models import Tag, Category, Post, Newsletter, Contact, Comment
+from rest_framework import viewsets, permissions, exceptions
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -56,3 +56,17 @@ class NewsletterSerializer(serializers.ModelSerializer):
     class Meta:
         model = Newsletter
         fields = "__all__"
+class ContactSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Contact
+        fields = "__all__"
+
+class CommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comment
+        fields = ["id", "content", "created_at", "post", "user"]
+        extra_kwargs = {
+            "post": {"read_only": True},
+            "user": {"read_only": True},
+            "created_at": {"read_only": True},
+        }

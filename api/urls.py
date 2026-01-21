@@ -10,6 +10,8 @@ router.register(r'tags', views.TagViewSet)
 router.register(r'categories', views.CategoryViewSet)
 router.register(r'posts', views.PostViewSet)
 router.register(r'newsletters', views.NewsletterViewSet)
+router.register(r'contacts', views.ContactViewSet)
+
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.
 urlpatterns = [
@@ -41,6 +43,11 @@ urlpatterns = [
         name="post-publish-api",
     ),
 
+    path(
+        "post/<int:post_id>/comments/",
+        views.CommentListCreateAPIView.as_view(),
+        name="comment-list-create-api",
+    ),
 
     path("api-auth/", include("rest_framework.urls", namespace="rest_framework")),
 ]
